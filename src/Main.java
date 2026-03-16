@@ -5,7 +5,7 @@ public class UseCase1 {
         System.out.println("**************************************************");
         System.out.println("  Welcome to the Hotel Booking Management System  ");
         System.out.println("**************************************************");
-
+        // hello
         // Confirm system startup
         System.out.println("\nSystem initialized and started successfully.");
         System.out.println("Ready for further implementation...");
