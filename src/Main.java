@@ -1,74 +1,66 @@
 import java.util.*;
 
-public class UC10 {
+public class UC11bms {
 
     /**
-     * CLASS - Room
-     * Stores static characteristics and base price.
+     * CLASS - NotificationService
+     * Use Case 11: Handles real-time communication with guests.
+     */
+    static class NotificationService {
+
+        /**
+         * Simulates sending a confirmation notification to the guest.
+         */
+        public void sendBookingConfirmation(String guestName, String roomType, String roomId) {
+            System.out.println("[NOTIFICATION SENT]");
+            System.out.println("To: " + guestName);
+            System.out.println("Message: Your booking for a " + roomType + " is confirmed!");
+            System.out.println("Your assigned Room ID is: " + roomId);
+            System.out.println("------------------------------------------");
+        }
+
+        public void sendFailureAlert(String guestName, String roomType) {
+            System.err.println("[NOTIFICATION ALERT]");
+            System.err.println("To: " + guestName);
+            System.err.println("Message: We're sorry, the " + roomType + " is currently unavailable.");
+            System.err.println("------------------------------------------");
+        }
+    }
+
+    /**
+     * CLASS - Room (Characteristics)
      */
     static class Room {
         private String type;
-        private double basePrice;
-
-        public Room(String type, double basePrice) {
-            this.type = type;
-            this.basePrice = basePrice;
-        }
-
+        public Room(String type) { this.type = type; }
         public String getType() { return type; }
-        public double getBasePrice() { return basePrice; }
     }
 
     /**
-     * CLASS - DynamicPricingService
-     * Use Case 10: Calculates the adjusted price based on seasonal demand.
-     */
-    static class DynamicPricingService {
-
-        /**
-         * Calculates final price: Base Price * Multiplier
-         * @param room The room being booked
-         * @param seasonMultiplier e.g., 1.2 for 20% increase during peak season
-         * @return adjusted price
-         */
-        public double calculateAdjustedPrice(Room room, double seasonMultiplier) {
-            return room.getBasePrice() * seasonMultiplier;
-        }
-
-        public void displayPriceComparison(Room room, double multiplier) {
-            double adjusted = calculateAdjustedPrice(room, multiplier);
-            System.out.println("Pricing Update for " + room.getType() + ":");
-            System.out.println("  Standard Rate: $" + room.getBasePrice());
-            System.out.println("  Seasonal Rate (" + (int)(multiplier * 100) + "%): $" + adjusted);
-            System.out.println();
-        }
-    }
-
-    /**
-     * MAIN CLASS - UC10bms
+     * MAIN CLASS - UC11bms
      */
     public static void main(String[] args) {
-        System.out.println("Hotel Management System: Dynamic Pricing Engine\n");
+        System.out.println("Hotel Management System: Real-time Notification Dispatcher\n");
 
-        // 1. Initialize Service
-        DynamicPricingService pricingService = new DynamicPricingService();
+        // 1. Initialize Notification Service
+        NotificationService notificationService = new NotificationService();
 
-        // 2. Define Rooms with Base Prices
-        Room single = new Room("Single Room", 1500.0);
-        Room doubleRm = new Room("Double Room", 2500.0);
-        Room suite = new Room("Suite Room", 5000.0);
+        // 2. Mock Data for demonstration
+        // In a full system, these variables would come from the Allocation Service
+        String guest1 = "Abhi";
+        String roomType1 = "Single Room";
+        String roomId1 = "SR-101";
 
-        // 3. Define Seasonal Multipliers (e.g., Holiday Season = 1.25x)
-        double holidayMultiplier = 1.25;
-        double offSeasonMultiplier = 0.90;
+        String guest2 = "Subha";
+        String roomType2 = "Double Room";
+        String roomId2 = "DR-202";
 
-        // 4. Demonstrate Price Adjustments
-        System.out.println("--- PEAK SEASON RATES ---");
-        pricingService.displayPriceComparison(single, holidayMultiplier);
-        pricingService.displayPriceComparison(doubleRm, holidayMultiplier);
-        pricingService.displayPriceComparison(suite, holidayMultiplier);
+        // 3. Trigger Real-time Notifications
+        // These are triggered immediately after the "Single Source of Truth" (Inventory) is updated
+        notificationService.sendBookingConfirmation(guest1, roomType1, roomId1);
+        notificationService.sendBookingConfirmation(guest2, roomType2, roomId2);
 
-        System.out.println("--- OFF-SEASON DISCOUNT RATES ---");
-        pricingService.displayPriceComparison(suite, offSeasonMultiplier);
+        // 4. Example of a failure notification (e.g., if inventory was 0)
+        notificationService.sendFailureAlert("Vanmathi", "Suite Room");
     }
 }
