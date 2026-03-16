@@ -1,107 +1,101 @@
 import java.util.*;
 
-public class UC6 {
+public class UC7 {
 
-    // --- FROM USE CASE 3 & 4 ---
+    // --- FROM PREVIOUS USE CASES ---
+    static class Room {
+        private String type;
+        private double pricePerNight;
+
+        public Room(String type, double pricePerNight) {
+            this.type = type;
+            this.pricePerNight = pricePerNight;
+        }
+
+        public String getType() { return type; }
+        public double getPricePerNight() { return pricePerNight; }
+    }
+
     static class RoomInventory {
         private Map<String, Integer> roomAvailability = new HashMap<>();
-
         public RoomInventory() {
             roomAvailability.put("Single", 5);
             roomAvailability.put("Double", 3);
             roomAvailability.put("Suite", 2);
         }
-
-        public Map<String, Integer> getRoomAvailability() {
-            return roomAvailability;
-        }
-
-        public void updateAvailability(String roomType, int count) {
-            roomAvailability.put(roomType, count);
-        }
+        public Map<String, Integer> getRoomAvailability() { return roomAvailability; }
+        public void updateAvailability(String type, int count) { roomAvailability.put(type, count); }
     }
 
-    // --- FROM USE CASE 5 ---
     static class Reservation {
         private String guestName;
         private String roomType;
-
         public Reservation(String guestName, String roomType) {
             this.guestName = guestName;
             this.roomType = roomType;
         }
-
         public String getGuestName() { return guestName; }
         public String getRoomType() { return roomType; }
     }
 
-    static class BookingRequestQueue {
-        private Queue<Reservation> requestQueue = new LinkedList<>();
-
-        public void addRequest(Reservation reservation) { requestQueue.offer(reservation); }
-        public Reservation getNextRequest() { return requestQueue.poll(); }
-        public boolean hasPendingRequests() { return !requestQueue.isEmpty(); }
-    }
-
-    // --- USE CASE 6 LOGIC ---
-    static class RoomAllocationService {
-        private Set<String> allocatedRoomIds = new HashSet<>();
-        private Map<String, Set<String>> assignedRoomsByType = new HashMap<>();
+    // --- USE CASE 7: BILLING & REVENUE SERVICE ---
+    static class BillingService {
+        private double totalRevenue = 0.0;
 
         /**
-         * Confirms a booking request by assigning a unique ID and updating inventory.
+         * Generates a bill for a confirmed booking and updates total revenue.
          */
-        public void allocateRoom(Reservation reservation, RoomInventory inventory) {
-            String type = reservation.getRoomType();
-            Map<String, Integer> availability = inventory.getRoomAvailability();
-
-            if (availability.getOrDefault(type, 0) > 0) {
-                // 1. Generate unique Room ID
-                String roomId = generateRoomId(type);
-
-                // 2. Assign and track
-                allocatedRoomIds.add(roomId);
-                assignedRoomsByType.computeIfAbsent(type, k -> new HashSet<>()).add(roomId);
-
-                // 3. Update inventory immediately
-                inventory.updateAvailability(type, availability.get(type) - 1);
-
-                // 4. Output confirmation
-                System.out.println("Booking confirmed for Guest: " + reservation.getGuestName()
-                        + ", Room ID: " + roomId);
-            } else {
-                System.out.println("Booking failed for Guest: " + reservation.getGuestName()
-                        + ". No " + type + " rooms available.");
-            }
+        public void generateBill(String guestName, Room room) {
+            double amount = room.getPricePerNight();
+            totalRevenue += amount;
+            System.out.println("Bill generated for " + guestName + ": $" + amount);
         }
 
-        private String generateRoomId(String roomType) {
-            // Logic to create ID based on current count of assigned rooms of that type
-            int count = assignedRoomsByType.getOrDefault(roomType, new HashSet<>()).size() + 1;
-            return roomType + "-" + count;
+        public double getTotalRevenue() {
+            return totalRevenue;
         }
     }
 
     /**
-     * MAIN CLASS - Execution point
+     * MAIN CLASS - UC7bms
      */
     public static void main(String[] args) {
-        System.out.println("Room Allocation Processing");
+        System.out.println("Hotel Billing & Revenue Summary\n");
 
-        // Initialize Services
+        // 1. Setup Data
         RoomInventory inventory = new RoomInventory();
-        BookingRequestQueue bookingQueue = new BookingRequestQueue();
-        RoomAllocationService allocationService = new RoomAllocationService();
+        BillingService billingService = new BillingService();
 
-        // Simulate Use Case 5: Capturing Requests in FIFO order
-        bookingQueue.addRequest(new Reservation("Abhi", "Single"));
-        bookingQueue.addRequest(new Reservation("Subha", "Single")); // Changed to match your screenshot output
-        bookingQueue.addRequest(new Reservation("Vanmathi", "Suite"));
+        // Define Room Pricing
+        Map<String, Room> roomDefinitions = new HashMap<>();
+        roomDefinitions.put("Single", new Room("Single Room", 1500.0));
+        roomDefinitions.put("Double", new Room("Double Room", 2500.0));
+        roomDefinitions.put("Suite", new Room("Suite Room", 5000.0));
 
-        // Process Use Case 6: Consume Queue and Allocate Rooms
-        while (bookingQueue.hasPendingRequests()) {
-            Reservation request = bookingQueue.getNextRequest();
-            allocationService.allocateRoom(request, inventory);
+        // 2. Create Booking Requests
+        List<Reservation> requests = new ArrayList<>();
+        requests.add(new Reservation("Abhi", "Single"));
+        requests.add(new Reservation("Subha", "Double"));
+        requests.add(new Reservation("Vanmathi", "Suite"));
+
+        // 3. Process Bookings and Billing
+        for (Reservation request : requests) {
+            String type = request.getRoomType();
+            int currentStock = inventory.getRoomAvailability().getOrDefault(type, 0);
+
+            if (currentStock > 0) {
+                // Update Inventory
+                inventory.updateAvailability(type, currentStock - 1);
+
+                // Generate Bill
+                Room roomDetail = roomDefinitions.get(type);
+                billingService.generateBill(request.getGuestName(), roomDetail);
+            }
         }
+
+        // 4. Final Revenue Report
+        System.out.println("\n-------------------------------");
+        System.out.println("Total Hotel Revenue: $" + billingService.getTotalRevenue());
+        System.out.println("-------------------------------");
     }
 }
