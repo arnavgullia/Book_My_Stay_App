@@ -1,66 +1,70 @@
 import java.util.*;
 
-public class UC11bms {
+public class UC12{
 
     /**
-     * CLASS - NotificationService
-     * Use Case 11: Handles real-time communication with guests.
+     * CLASS - RoomInventory
+     * Manages the live availability of rooms.
      */
-    static class NotificationService {
+    static class RoomInventory {
+        private Map<String, Integer> roomAvailability = new HashMap<>();
 
-        /**
-         * Simulates sending a confirmation notification to the guest.
-         */
-        public void sendBookingConfirmation(String guestName, String roomType, String roomId) {
-            System.out.println("[NOTIFICATION SENT]");
-            System.out.println("To: " + guestName);
-            System.out.println("Message: Your booking for a " + roomType + " is confirmed!");
-            System.out.println("Your assigned Room ID is: " + roomId);
-            System.out.println("------------------------------------------");
+        public RoomInventory() {
+            // Initial state (after some bookings have already happened)
+            roomAvailability.put("Single", 4);
+            roomAvailability.put("Double", 2);
+            roomAvailability.put("Suite", 1);
         }
 
-        public void sendFailureAlert(String guestName, String roomType) {
-            System.err.println("[NOTIFICATION ALERT]");
-            System.err.println("To: " + guestName);
-            System.err.println("Message: We're sorry, the " + roomType + " is currently unavailable.");
-            System.err.println("------------------------------------------");
+        public void revertInventory(String roomType) {
+            int currentCount = roomAvailability.getOrDefault(roomType, 0);
+            roomAvailability.put(roomType, currentCount + 1);
+            System.out.println("Inventory Reverted: " + roomType + " count is now " + (currentCount + 1));
+        }
+
+        public void displayStatus() {
+            System.out.println("Current Availability: " + roomAvailability);
         }
     }
 
     /**
-     * CLASS - Room (Characteristics)
+     * CLASS - CancellationService
+     * Use Case 12: Handles the cancellation process and triggers inventory updates.
      */
-    static class Room {
-        private String type;
-        public Room(String type) { this.type = type; }
-        public String getType() { return type; }
+    static class CancellationService {
+
+        public void processCancellation(String guestName, String roomType, RoomInventory inventory) {
+            System.out.println("Processing Cancellation for Guest: " + guestName);
+
+            // 1. Revert the inventory count
+            inventory.revertInventory(roomType);
+
+            // 2. Log confirmation
+            System.out.println("Cancellation successful. Refund initiated for " + guestName + ".");
+            System.out.println("----------------------------------------------");
+        }
     }
 
     /**
-     * MAIN CLASS - UC11bms
+     * MAIN CLASS - UC12bms
      */
     public static void main(String[] args) {
-        System.out.println("Hotel Management System: Real-time Notification Dispatcher\n");
+        System.out.println("Hotel Management System: Cancellation & Reversion\n");
 
-        // 1. Initialize Notification Service
-        NotificationService notificationService = new NotificationService();
+        // 1. Setup
+        RoomInventory inventory = new RoomInventory();
+        CancellationService cancellationService = new CancellationService();
 
-        // 2. Mock Data for demonstration
-        // In a full system, these variables would come from the Allocation Service
-        String guest1 = "Abhi";
-        String roomType1 = "Single Room";
-        String roomId1 = "SR-101";
+        // 2. Show state before cancellation
+        System.out.print("Before Cancellation -> ");
+        inventory.displayStatus();
+        System.out.println();
 
-        String guest2 = "Subha";
-        String roomType2 = "Double Room";
-        String roomId2 = "DR-202";
+        // 3. Perform Cancellation (User: Abhi cancels a Single Room)
+        cancellationService.processCancellation("Abhi", "Single", inventory);
 
-        // 3. Trigger Real-time Notifications
-        // These are triggered immediately after the "Single Source of Truth" (Inventory) is updated
-        notificationService.sendBookingConfirmation(guest1, roomType1, roomId1);
-        notificationService.sendBookingConfirmation(guest2, roomType2, roomId2);
-
-        // 4. Example of a failure notification (e.g., if inventory was 0)
-        notificationService.sendFailureAlert("Vanmathi", "Suite Room");
+        // 4. Show state after cancellation
+        System.out.print("After Cancellation  -> ");
+        inventory.displayStatus();
     }
 }
