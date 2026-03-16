@@ -1,68 +1,80 @@
-/**
- * Consolidated Use Case 2: Basic Room Types & Static Availability
- */
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-// --- Domain Models ---
+public class UC3 {
 
-abstract class Room {
-    protected int numberOfBeds;
-    protected int squareFeet;
-    protected double pricePerNight;
+    /**
+     * Inner Class - Room
+     * Defines the static characteristics.
+     */
+    static class Room {
+        private String type;
+        private int beds;
+        private int size;
+        private double pricePerNight;
 
-    public Room(int numberOfBeds, int squareFeet, double pricePerNight) {
-        this.numberOfBeds = numberOfBeds;
-        this.squareFeet = squareFeet;
-        this.pricePerNight = pricePerNight;
+        public Room(String type, int beds, int size, double pricePerNight) {
+            this.type = type;
+            this.beds = beds;
+            this.size = size;
+            this.pricePerNight = pricePerNight;
+        }
+
+        public String getType() { return type; }
+        public int getBeds() { return beds; }
+        public int getSize() { return size; }
+        public double getPricePerNight() { return pricePerNight; }
     }
 
-    public void displayRoomDetails() {
-        System.out.println("Room Details - Beds: " + numberOfBeds
-                + ", Area: " + squareFeet + " sq.ft, Price: $" + pricePerNight);
+    /**
+     * Inner Class - RoomInventory
+     * Manages centralized availability.
+     */
+    static class RoomInventory {
+        private Map<String, Integer> roomAvailability;
+
+        public RoomInventory() {
+            roomAvailability = new HashMap<>();
+            initializeInventory();
+        }
+
+        private void initializeInventory() {
+            roomAvailability.put("Single Room", 5);
+            roomAvailability.put("Double Room", 3);
+            roomAvailability.put("Suite Room", 2);
+        }
+
+        public Map<String, Integer> getRoomAvailability() {
+            return roomAvailability;
+        }
     }
-}
 
-class SingleRoom extends Room {
-    public SingleRoom() {
-        super(1, 250, 1500.0);
-    }
-}
-
-class DoubleRoom extends Room {
-    public DoubleRoom() {
-        super(2, 400, 2500.0);
-    }
-}
-
-class SuiteRoom extends Room {
-    public SuiteRoom() {
-        super(3, 750, 5000.0);
-    }
-}
-
-// --- Main Entry Point ---
-
-public class UseCase2 {
-
+    /**
+     * Entry Point
+     */
     public static void main(String[] args) {
-        // Initialization
-        Room singleRoom = new SingleRoom();
-        Room doubleRoom = new DoubleRoom();
-        Room suiteRoom = new SuiteRoom();
+        RoomInventory inventory = new RoomInventory();
 
-        // Static availability variables
-        int singleRoomsAvailable = 10;
-        int doubleRoomsAvailable = 5;
-        int suiteRoomsAvailable = 2;
+        List<Room> roomSpecs = new ArrayList<>();
+        roomSpecs.add(new Room("Single Room", 1, 250, 1500.0));
+        roomSpecs.add(new Room("Double Room", 2, 400, 2500.0));
+        roomSpecs.add(new Room("Suite Room", 3, 750, 5000.0));
 
-        System.out.println("--- Hotel Room Initialization ---");
+        System.out.println("Hotel Room Inventory Status\n");
 
-        System.out.print("Single Room (Available: " + singleRoomsAvailable + ") -> ");
-        singleRoom.displayRoomDetails();
+        Map<String, Integer> currentAvailability = inventory.getRoomAvailability();
 
-        System.out.print("Double Room (Available: " + doubleRoomsAvailable + ") -> ");
-        doubleRoom.displayRoomDetails();
+        for (Room room : roomSpecs) {
+            System.out.println(room.getType() + ":");
+            System.out.println("Beds: " + room.getBeds());
+            System.out.println("Size: " + room.getSize() + " sqft");
+            System.out.println("Price per night: " + room.getPricePerNight());
 
-        System.out.print("Suite Room (Available: " + suiteRoomsAvailable + ") -> ");
-        suiteRoom.displayRoomDetails();
+            int availableCount = currentAvailability.getOrDefault(room.getType(), 0);
+            System.out.println("Available Rooms: " + availableCount);
+            System.out.println();
+        }
     }
 }
